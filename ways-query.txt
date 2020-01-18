@@ -1,0 +1,26 @@
+// define a global bounding box (s,w,n,e)
+[bbox:43.5,-79.7,43.9,-79.0];
+
+// Toronto (city) by id for clipping the data
+rel(324211)->.TO;
+rel(324211); map_to_area->.TOarea;
+
+( 
+	( // all highways except a few types not used by transit
+		way[highway]; -
+		way[highway~'footway|path|pedestrian|cycleway|steps'];
+	);
+	way[railway=tram];
+  	rel[type=restriction];
+	rel[route~'bus|tram'];
+)->.streets;
+
+( // only keep what's in or around Toronto
+	nwr.streets(area.TOarea);    // in
+	nwr.streets(around.TO:3000); // around
+);
+
+// join any children of the above ways and relations
+(._;>;); 
+
+out body qt;
